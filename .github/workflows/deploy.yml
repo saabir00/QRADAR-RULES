@@ -1,0 +1,77 @@
+name: QRadar Rules Deploy Pipeline
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'rules/**.json'
+      - 'scripts/**'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate Rule Files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repo-nu yukle
+        uses: actions/checkout@v4
+      - name: Python qur
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Asililiqlari yukle
+        run: pip install requests urllib3
+      - name: JSON fayllarini yoxla
+        run: |
+          python3 - <<'EOF'
+          import json, glob, sys
+          files = glob.glob('rules/*.json')
+          if not files:
+              print("XETA: Hec bir JSON fayl tapilmadi!")
+              sys.exit(1)
+          errors = 0
+          for f in sorted(files):
+              try:
+                  with open(f) as fh:
+                      data = json.load(fh)
+                  required = ['id', 'title', 'status', 'aql', 'qradar']
+                  missing = [k for k in required if k not in data]
+                  if missing:
+                      print(f"XETA: {f} - catismayan saheler: {missing}")
+                      errors += 1
+                  else:
+                      print(f"OK: {f}")
+              except json.JSONDecodeError as e:
+                  print(f"XETA: {f} - JSON xetasi: {e}")
+                  errors += 1
+          print(f"Yekun: {len(files)-errors} OK, {errors} xeta")
+          sys.exit(1 if errors > 0 else 0)
+          EOF
+
+  deploy:
+    name: Deploy to QRadar
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Repo-nu yukle
+        uses: actions/checkout@v4
+      - name: Python qur
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Asililiqlari yukle
+        run: pip install requests urllib3
+      - name: QRadar-a deploy et
+        env:
+          QRADAR_HOST:      ${{ secrets.QRADAR_HOST }}
+          QRADAR_SEC_TOKEN: ${{ secrets.QRADAR_SEC_TOKEN }}
+        run: python3 scripts/deploy_rules.py
+      - name: Deploy neticesini goster
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "Butun rule-lar QRadar-a ugurla deploy edildi!"
+          else
+            echo "Deploy zamani xeta bas verdi!"
+          fi
