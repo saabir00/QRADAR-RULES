@@ -1,0 +1,37 @@
+{
+  "id": "QRADAR-RULE-002",
+  "title": "Successful Login After Brute Force",
+  "status": "production",
+  "description": "Detects a successful Windows logon (4624) that follows a burst of failed logons from the same source, indicating account compromise.",
+  "author": "SOC Team",
+  "date": "2026/06/24",
+  "tags": [
+    "attack.credential_access",
+    "attack.t1110"
+  ],
+  "mitre": {
+    "tactic": "Credential Access",
+    "technique": "T1110",
+    "subtechnique": ""
+  },
+  "logsource": {
+    "product": "windows",
+    "service": "security"
+  },
+  "qradar": {
+    "rule_name": "SOC-002: Successful Login After Brute Force",
+    "severity": "CRITICAL",
+    "credibility": 9,
+    "relevance": 10,
+    "response_action": "create_offense",
+    "reference_set": "Compromised_Logon_Sources",
+    "reference_type": "IP",
+    "indicator": "sourceip"
+  },
+  "aql": "SELECT sourceip, username, QIDNAME(qid) AS EventName FROM events WHERE UTF8(payload) ILIKE '%EventID=4624%' AND UTF8(payload) ILIKE '%AgentLogFile=Security%' AND username NOT ILIKE '%$' ORDER BY starttime DESC LAST 15 MINUTES",
+  "falsepositives": [
+    "Legitimate login after forgotten password",
+    "Password manager auto-fill retries"
+  ],
+  "level": "critical"
+}

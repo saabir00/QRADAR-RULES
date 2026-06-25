@@ -1,0 +1,39 @@
+{
+  "id": "QRADAR-RULE-001",
+  "title": "Brute Force / Password Spray",
+  "status": "production",
+  "description": "Detects brute force / password spray attacks via repeated Windows failed logon events (EventID 4625) from the same source.",
+  "author": "SOC Team",
+  "date": "2026/06/24",
+  "tags": [
+    "attack.credential_access",
+    "attack.t1110.001",
+    "attack.t1110.003"
+  ],
+  "mitre": {
+    "tactic": "Credential Access",
+    "technique": "T1110",
+    "subtechnique": "T1110.001"
+  },
+  "logsource": {
+    "product": "windows",
+    "service": "security"
+  },
+  "qradar": {
+    "rule_name": "SOC-001: Brute Force / Password Spray",
+    "severity": "HIGH",
+    "credibility": 8,
+    "relevance": 9,
+    "response_action": "create_offense",
+    "reference_set": "BruteForce_Sources",
+    "reference_type": "IP",
+    "indicator": "sourceip"
+  },
+  "aql": "SELECT sourceip, COUNT(*) AS hits FROM events WHERE UTF8(payload) ILIKE '%EventID=4625%' AND UTF8(payload) ILIKE '%AgentLogFile=Security%' AND username NOT ILIKE '%$' GROUP BY sourceip HAVING COUNT(*) >= 15 ORDER BY hits DESC LAST 10 MINUTES",
+  "falsepositives": [
+    "Service accounts with stale passwords",
+    "Authorized vulnerability scanners",
+    "Users mistyping passwords"
+  ],
+  "level": "high"
+}
