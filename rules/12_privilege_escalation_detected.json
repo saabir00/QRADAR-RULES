@@ -1,0 +1,38 @@
+{
+  "id": "QRADAR-RULE-012",
+  "title": "Privilege Escalation Attempt Detected (Linux)",
+  "status": "production",
+  "description": "Detects Linux privilege escalation attempts (sudo -i/-s, SUID changes, pkexec abuse).",
+  "author": "SOC Team",
+  "date": "2026/06/24",
+  "tags": [
+    "attack.privilege_escalation",
+    "attack.t1548",
+    "attack.t1068"
+  ],
+  "mitre": {
+    "tactic": "Privilege Escalation",
+    "technique": "T1548",
+    "subtechnique": ""
+  },
+  "logsource": {
+    "product": "linux",
+    "service": "auditd"
+  },
+  "qradar": {
+    "rule_name": "SOC-012: Privilege Escalation Attempt Detected (Linux)",
+    "severity": "CRITICAL",
+    "credibility": 9,
+    "relevance": 10,
+    "response_action": "create_offense",
+    "reference_set": "Linux_PrivEsc_Hosts",
+    "reference_type": "ALN",
+    "indicator": "username"
+  },
+  "aql": "SELECT sourceip, username, QIDNAME(qid) AS EventName FROM events WHERE LOGSOURCENAME(logsourceid) ILIKE '%LinuxServer%' AND (UTF8(payload) ILIKE '%sudo -i%' OR UTF8(payload) ILIKE '%chmod 4755%' OR UTF8(payload) ILIKE '%pkexec%') ORDER BY starttime DESC LAST 5 MINUTES",
+  "falsepositives": [
+    "Authorized administrators",
+    "Legitimate SUID binaries"
+  ],
+  "level": "critical"
+}

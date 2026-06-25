@@ -1,0 +1,37 @@
+{
+  "id": "QRADAR-RULE-004",
+  "title": "Encoded / Obfuscated PowerShell",
+  "status": "production",
+  "description": "Detects encoded/obfuscated PowerShell execution (4688/4104) using base64, hidden window, download cradles and bypass flags.",
+  "author": "SOC Team",
+  "date": "2026/06/24",
+  "tags": [
+    "attack.execution",
+    "attack.t1059.001"
+  ],
+  "mitre": {
+    "tactic": "Execution",
+    "technique": "T1059",
+    "subtechnique": "T1059.001"
+  },
+  "logsource": {
+    "product": "windows",
+    "service": "security"
+  },
+  "qradar": {
+    "rule_name": "SOC-004: Encoded / Obfuscated PowerShell",
+    "severity": "HIGH",
+    "credibility": 8,
+    "relevance": 9,
+    "response_action": "create_offense",
+    "reference_set": "Encoded_PS_Hosts",
+    "reference_type": "ALN",
+    "indicator": "username"
+  },
+  "aql": "SELECT sourceip, username, QIDNAME(qid) AS EventName FROM events WHERE UTF8(payload) ILIKE '%EventID=4688%' AND UTF8(payload) ILIKE '%powershell%' AND (UTF8(payload) ILIKE '%-enc%' OR UTF8(payload) ILIKE '%frombase64string%' OR UTF8(payload) ILIKE '%downloadstring%' OR UTF8(payload) ILIKE '%bypass%') ORDER BY starttime DESC LAST 10 MINUTES",
+  "falsepositives": [
+    "Legitimate admin automation scripts",
+    "Software deployment tooling"
+  ],
+  "level": "high"
+}

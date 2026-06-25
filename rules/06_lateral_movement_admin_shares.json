@@ -1,0 +1,37 @@
+{
+  "id": "QRADAR-RULE-006",
+  "title": "Lateral Movement via Admin Shares / PsExec",
+  "status": "production",
+  "description": "Detects access to administrative shares (ADMIN$/C$/IPC$) via 5145/5140, consistent with PsExec-style lateral movement.",
+  "author": "SOC Team",
+  "date": "2026/06/24",
+  "tags": [
+    "attack.lateral_movement",
+    "attack.t1021.002"
+  ],
+  "mitre": {
+    "tactic": "Lateral Movement",
+    "technique": "T1021",
+    "subtechnique": "T1021.002"
+  },
+  "logsource": {
+    "product": "windows",
+    "service": "security"
+  },
+  "qradar": {
+    "rule_name": "SOC-006: Lateral Movement via Admin Shares / PsExec",
+    "severity": "HIGH",
+    "credibility": 8,
+    "relevance": 9,
+    "response_action": "create_offense",
+    "reference_set": "Lateral_Movement_Sources",
+    "reference_type": "IP",
+    "indicator": "sourceip"
+  },
+  "aql": "SELECT sourceip, username, QIDNAME(qid) AS EventName FROM events WHERE (UTF8(payload) ILIKE '%EventID=5145%' OR UTF8(payload) ILIKE '%EventID=5140%') AND (UTF8(payload) ILIKE '%ADMIN$%' OR UTF8(payload) ILIKE '%C$%' OR UTF8(payload) ILIKE '%IPC$%') AND username NOT ILIKE '%$' ORDER BY starttime DESC LAST 15 MINUTES",
+  "falsepositives": [
+    "Sanctioned admin/jump hosts",
+    "Backup and management agents"
+  ],
+  "level": "high"
+}

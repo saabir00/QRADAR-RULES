@@ -1,0 +1,38 @@
+{
+  "id": "QRADAR-RULE-005",
+  "title": "Suspicious Service / Scheduled-Task Persistence",
+  "status": "production",
+  "description": "Detects suspicious Windows service (4697) or scheduled task (4698) creation pointing to LOLBINs or temp/appdata paths.",
+  "author": "SOC Team",
+  "date": "2026/06/24",
+  "tags": [
+    "attack.persistence",
+    "attack.t1543.003",
+    "attack.t1053.005"
+  ],
+  "mitre": {
+    "tactic": "Persistence",
+    "technique": "T1543",
+    "subtechnique": "T1543.003"
+  },
+  "logsource": {
+    "product": "windows",
+    "service": "security"
+  },
+  "qradar": {
+    "rule_name": "SOC-005: Suspicious Service / Scheduled-Task Persistence",
+    "severity": "HIGH",
+    "credibility": 8,
+    "relevance": 9,
+    "response_action": "create_offense",
+    "reference_set": "Persistence_Hosts",
+    "reference_type": "ALN",
+    "indicator": "username"
+  },
+  "aql": "SELECT sourceip, username, QIDNAME(qid) AS EventName FROM events WHERE (UTF8(payload) ILIKE '%EventID=4697%' OR UTF8(payload) ILIKE '%EventID=4698%') AND UTF8(payload) ILIKE '%AgentLogFile=Security%' ORDER BY starttime DESC LAST 15 MINUTES",
+  "falsepositives": [
+    "Legitimate software installs",
+    "Approved IT automation"
+  ],
+  "level": "high"
+}

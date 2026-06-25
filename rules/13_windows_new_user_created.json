@@ -1,0 +1,38 @@
+{
+  "id": "QRADAR-RULE-013",
+  "title": "Windows New User Account Created",
+  "status": "production",
+  "description": "Detects creation of a new Windows user account (EventID 4720), a common persistence technique.",
+  "author": "SOC Team",
+  "date": "2026/06/24",
+  "tags": [
+    "attack.persistence",
+    "attack.t1136.001",
+    "attack.t1136.002"
+  ],
+  "mitre": {
+    "tactic": "Persistence",
+    "technique": "T1136",
+    "subtechnique": "T1136.001"
+  },
+  "logsource": {
+    "product": "windows",
+    "service": "security"
+  },
+  "qradar": {
+    "rule_name": "SOC-013: Windows New User Account Created",
+    "severity": "HIGH",
+    "credibility": 7,
+    "relevance": 8,
+    "response_action": "create_offense",
+    "reference_set": "New_User_Hosts",
+    "reference_type": "ALN",
+    "indicator": "username"
+  },
+  "aql": "SELECT sourceip, username, QIDNAME(qid) AS EventName FROM events WHERE UTF8(payload) ILIKE '%EventID=4720%' AND UTF8(payload) ILIKE '%AgentLogFile=Security%' ORDER BY starttime DESC LAST 15 MINUTES",
+  "falsepositives": [
+    "IT helpdesk onboarding",
+    "Automated provisioning scripts"
+  ],
+  "level": "high"
+}
